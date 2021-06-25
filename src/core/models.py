@@ -30,6 +30,8 @@ class Job(models.Model):
 
     title = models.CharField(max_length=60)
     description = models.TextField(validators=[MinLengthValidator(30)])
+    company_name = models.CharField(max_length=50)
+    location = models.CharField(max_length=50)
     posted_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     posted_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posted_jobs')

@@ -12,7 +12,7 @@ user_urls = [
 
 job_urls = [
     path('', JobListView.as_view(), name='list-jobs'),
-    path('', JobCreateAPIView.as_view(), name='create-job'),
+    path('new/', JobCreateAPIView.as_view(), name='create-job'),
     path('<int:job_id>/applicants/', ListCandidatesForJobView.as_view(), name='list-applicants-for-job'),
     path('apply/', JobApplyView.as_view(), name='apply-to-jobs'),
 ]

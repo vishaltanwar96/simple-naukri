@@ -1,10 +1,11 @@
 from rest_framework import status
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound, PermissionDenied
-from rest_framework.generics import CreateAPIView, ListAPIView
 from django.contrib.auth import get_user_model
 from guardian.shortcuts import assign_perm, get_objects_for_user
+from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.generics import CreateAPIView, ListAPIView, GenericAPIView
 
 from core.models import Job
 from core.filters import JobFilterSet
@@ -16,12 +17,18 @@ User = get_user_model()
 
 
 class UserRegistrationView(CreateAPIView):
+    """
+    Candidate/Recruiter Signup
+    """
 
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
 
 class JobCreateAPIView(CreateAPIView):
+    """
+    Recruiter can post jobs using this API
+    """
 
     serializer_class = JobSerializer
     queryset = Job.objects.all()
@@ -34,9 +41,13 @@ class JobCreateAPIView(CreateAPIView):
 
 
 class ListCandidatesForJobView(APIView):
+    """
+    Lists all the candidates who have applied to a previously posted job by the current recuiter
+    """
 
     permission_classes = [IsRecruiter]
 
+    @extend_schema(responses={status.HTTP_200_OK: UserSerializer})
     def get(self, request, job_id):
 
         try:
@@ -52,6 +63,12 @@ class ListCandidatesForJobView(APIView):
 
 
 class JobListView(ListAPIView):
+    """
+    Lists all the jobs if a Candidate is requesting and Lists the created jobs
+    by the recruiter if recruiter is requesting.
+    Also acts as a search view for the candidate and can search jobs using recruiter_fname, recruiter_lname
+    description(of job) and title(of job).
+    """
 
     queryset = Job.objects.all()
     serializer_class = JobSerializer
@@ -67,13 +84,17 @@ class JobListView(ListAPIView):
         return queryset
 
 
-class JobApplyView(APIView):
+class JobApplyView(GenericAPIView):
+    """
+    A Candidate can apply to one or more jobs by passing in a list of Job IDs.
+    """
 
     permission_classes = [IsCandidate]
+    serializer_class = JobIDSerializer
 
     def post(self, request):
 
-        serializer = JobIDSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         jobs = serializer.validated_data['job_ids']

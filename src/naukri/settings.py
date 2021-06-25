@@ -9,21 +9,36 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
+import os
 from datetime import timedelta
 from pathlib import Path
 
+from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
+
+
+def check_environment_variable(variable_name):
+
+    try:
+        return os.environ[variable_name]
+    except KeyError:
+        raise ImproperlyConfigured(f'Please set environment variable -> {variable_name}')
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-=@*jmlpoh$2j7kk(1lr&x0xqjei($8r=1hhpd@-5ltfym@yu(7'
+SECRET_KEY = check_environment_variable('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = check_environment_variable('DEBUG')
 
 ALLOWED_HOSTS = ['*']
 
@@ -40,6 +55,7 @@ INSTALLED_APPS = [
     'guardian',
     'rest_framework',
     'django_filters',
+    'drf_spectacular',
     'core',
 ]
 
@@ -80,11 +96,11 @@ WSGI_APPLICATION = 'naukri.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'simplenaukri',
-        'USER': 'vishal',
-        'PASSWORD': 'supersecret',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'NAME': check_environment_variable('DATABASE_NAME'),
+        'USER': check_environment_variable('DATABASE_USER'),
+        'PASSWORD': check_environment_variable('DATABASE_PASSWORD'),
+        'HOST': check_environment_variable('DATABASE_HOST'),
+        'PORT': check_environment_variable('DATABASE_PORT'),
     }
 }
 
@@ -101,11 +117,22 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': '15',
-    'DATETIME_FORMAT': '%d-%m-%Y %H:%M:%s',
+    'DATETIME_FORMAT': '%d-%m-%Y %H:%M:%S',
     'DATE_FORMAT': '%d-%m-%Y',
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Simple Naukri API',
+    'DESCRIPTION': 'Imitating Naukri.com using Django Rest Framework APIs',
+    'VERSION': '1.0.0',
+    'CONTACT': {
+        'name': 'Vishal Tanwar',
+        'email': 'vishal.tanwar@outlook.com',
+    }
 }
 
 SIMPLE_JWT = {
