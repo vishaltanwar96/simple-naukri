@@ -36,7 +36,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = check_environment_variable('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = check_environment_variable('DEBUG')
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -95,14 +95,7 @@ WSGI_APPLICATION = 'naukri.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': check_environment_variable('DATABASE_NAME'),
-        'USER': check_environment_variable('DATABASE_USER'),
-        'PASSWORD': check_environment_variable('DATABASE_PASSWORD'),
-        'HOST': check_environment_variable('DATABASE_HOST'),
-        'PORT': check_environment_variable('DATABASE_PORT'),
-    }
+    'default': {}
 }
 
 AUTHENTICATION_BACKENDS = (
